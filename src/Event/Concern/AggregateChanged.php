@@ -88,7 +88,8 @@ trait AggregateChanged
             $value = $property->getValue($this);
 
             $context = new SerializationContext($name, $value, $this->payload);
-            $this->payload[$name] = $serialize($context);
+            ['name' => $saveUnderName, 'value' => $serialized] = $serialize($context);
+            $this->payload[$saveUnderName] = $serialized;
         }
     }
 
@@ -108,6 +109,7 @@ trait AggregateChanged
         }
     }
 
+    /** @return ReflectionProperty[] */
     protected function properties(ReflectionClass $reflectionClass): array
     {
         $properties = array_filter(

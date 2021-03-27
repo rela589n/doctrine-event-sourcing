@@ -11,14 +11,21 @@ use Doctrine\DBAL\Types\Type;
 final class SerializeAs
 {
     private Type $type;
+    private ?string $name;
 
-    public function __construct(string $type)
+    public function __construct(string $type, ?string $name = null)
     {
         $this->type = Type::getType($type);
+        $this->name = $name;
     }
 
     public function getType(): Type
     {
         return $this->type;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

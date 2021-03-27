@@ -6,11 +6,22 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Context;
 
 final class SerializationContext
 {
-    public function __construct(private string $name, private mixed $value, private array $attributes) { }
+    public function __construct(
+        private string $fieldName,
+        private mixed $value,
+        private array $attributes,
+        private ?string $name = null,
+    ) {
+    }
 
     public function getName(): string
     {
-        return $this->name;
+        return $this->name ?? $this->fieldName;
+    }
+
+    public function getFieldName(): string
+    {
+        return $this->fieldName;
     }
 
     public function getValue(): mixed

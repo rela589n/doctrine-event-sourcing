@@ -26,14 +26,15 @@ final class DeserializeTyped implements SeparateDeserializer
 
     public function isPossible(DeserializationContext $context): bool
     {
-        return isset($this->propertiesTypes[$context->getName()]);
+        return isset($this->propertiesTypes[$context->getFieldName()]);
     }
 
     public function __invoke(DeserializationContext $context): mixed
     {
-        $name = $context->getName();
+        $fieldName = $context->getFieldName();
         $serialized = $context->getSerialized();
+        $name = $context->getName();
 
-        return ($this->convertToPHPValue)($this->propertiesTypes[$name], $serialized[$name]);
+        return ($this->convertToPHPValue)($this->propertiesTypes[$fieldName], $serialized[$name]);
     }
 }

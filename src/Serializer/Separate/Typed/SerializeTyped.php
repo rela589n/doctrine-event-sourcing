@@ -26,11 +26,11 @@ final class SerializeTyped implements SeparateSerializer
 
     public function isPossible(SerializationContext $context): bool
     {
-        return isset($this->propertiesTypes[$context->getName()]);
+        return isset($this->propertiesTypes[$context->getFieldName()]);
     }
 
     public function __invoke(SerializationContext $context): mixed
     {
-        return ($this->convertToDatabaseValue)($this->propertiesTypes[$context->getName()], $context->getValue());
+        return ($this->convertToDatabaseValue)($this->propertiesTypes[$context->getFieldName()], $context->getValue());
     }
 }

@@ -32,15 +32,16 @@ final class DeserializeCastable implements SeparateDeserializer
     public function __invoke(DeserializationContext $context): mixed
     {
         /** @var string|Castable $type */
+        $fieldName = $context->getFieldName();
         $name = $context->getName();
         $type = $context->getType();
         $serialized = $context->getSerialized();
 
         /** @var CastsAttributes $caster */
-        $caster = $type::castUsing($this->castArguments[$name] ?? $this->castArguments[$type] ?? []);
+        $caster = $type::castUsing($this->castArguments[$fieldName] ?? $this->castArguments[$type] ?? []);
 
         $attributes = $serialized[$name];
 
-        return $caster->get($this->entity, $name, $attributes[$name] ?? null, $attributes);
+        return $caster->get($this->entity, $fieldName, $attributes[$name] ?? null, $attributes);
     }
 }

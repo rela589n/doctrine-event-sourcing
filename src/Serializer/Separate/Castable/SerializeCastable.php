@@ -30,13 +30,14 @@ final class SerializeCastable implements SeparateSerializer
 
     public function __invoke(SerializationContext $context): mixed
     {
+        $fieldName = $context->getFieldName();
         $name = $context->getName();
         $value = $context->getValue();
         $attributes = $context->getAttributes();
 
         /** @var CastsAttributes $caster */
-        $caster = $value::castUsing($this->castArguments[$name] ?? $this->castArguments[$value::class] ?? []);
+        $caster = $value::castUsing($this->castArguments[$fieldName] ?? $this->castArguments[$value::class] ?? []);
 
-        return $caster->set($this->entity, $name, $value, $attributes[$name]);
+        return $caster->set($this->entity, $fieldName, $value, $attributes[$name]);
     }
 }

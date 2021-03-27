@@ -8,6 +8,9 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Event\Annotations\SerializeAs;
+use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
+use Rela589n\DoctrineEventSourcing\Serializer\Pipeline\Pipes\SubstituteAnnotatedSerializeName;
+use Rela589n\DoctrineEventSourcing\Serializer\Pipeline\SerializationContextPipe;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\SerializeCastable;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\SerializeEmbedded;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\SerializeEntity;
@@ -19,6 +22,7 @@ final class SerializeProperty extends ComposedSerializer
 {
     /** @var Type[] */
     private array $typesMeta;
+    private array $namesMeta;
 
     public function __construct(
         private EntityManagerInterface $manager,
@@ -28,10 +32,17 @@ final class SerializeProperty extends ComposedSerializer
     ) {
         $this->propertiesMeta = array_map(static fn(SerializeAs $as) => $as, $this->propertiesMeta);
         $this->typesMeta = array_map(static fn(SerializeAs $as) => $as->getType(), $this->propertiesMeta);
+        $this->namesMeta = array_filter(array_map(static fn(SerializeAs $as) => $as->getName(), $this->propertiesMeta));
+    }
+
+    /** @return iterable<SerializationContextPipe> */
+    protected function pipes(SerializationContext $context): iterable
+    {
+        yield new SubstituteAnnotatedSerializeName($this->namesMeta);
     }
 
     /** @return iterable<SeparateSerializer> */
-    protected function serializers(): iterable
+    protected function serializers(SerializationContext $context): iterable
     {
         yield SerializeTyped::from($this->manager, $this->typesMeta);
         yield SerializeEntity::from($this->manager);
