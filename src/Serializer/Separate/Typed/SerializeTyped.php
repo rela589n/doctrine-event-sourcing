@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed;
 
-use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
-use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
+use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 
 final class SerializeTyped implements SeparateSerializer
 {
@@ -23,13 +24,13 @@ final class SerializeTyped implements SeparateSerializer
         return new self(ConvertToDatabaseValue::fromEntityManager($manager), $propertiesTypes);
     }
 
-    public function isPossible(string $name, mixed $value, array $attributes): bool
+    public function isPossible(SerializationContext $context): bool
     {
-        return isset($this->propertiesTypes[$name]);
+        return isset($this->propertiesTypes[$context->getName()]);
     }
 
-    public function __invoke(string $name, mixed $value, array $attributes): mixed
+    public function __invoke(SerializationContext $context): mixed
     {
-        return ($this->convertToDatabaseValue)($this->propertiesTypes[$name], $value);
+        return ($this->convertToDatabaseValue)($this->propertiesTypes[$context->getName()], $context->getValue());
     }
 }
