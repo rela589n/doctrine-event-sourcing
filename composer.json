@@ -17,5 +17,13 @@
             "email": "zsidelnik@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-4": {"Rela589n\\DoctrineEventSourcing\\" : "src/"}
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "minimum-stability": "dev"
 }
