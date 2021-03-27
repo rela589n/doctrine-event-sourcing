@@ -10,16 +10,18 @@ use Doctrine\DBAL\Types\Type;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class SerializeAs
 {
-    private Type $type;
+    private ?Type $type;
     private ?string $name;
 
-    public function __construct(string $type, ?string $name = null)
+    public function __construct(?string $type = null, ?string $name = null)
     {
-        $this->type = Type::getType($type);
         $this->name = $name;
+        $this->type = (null !== $type)
+            ? Type::getType($type)
+            : null;
     }
 
-    public function getType(): Type
+    public function getType(): ?Type
     {
         return $this->type;
     }

@@ -31,7 +31,7 @@ final class SerializeProperty extends ComposedSerializer
         private array $castArgumentsMap = [],
     ) {
         $this->propertiesMeta = array_map(static fn(SerializeAs $as) => $as, $this->propertiesMeta);
-        $this->typesMeta = array_map(static fn(SerializeAs $as) => $as->getType(), $this->propertiesMeta);
+        $this->typesMeta = array_filter(array_map(static fn(SerializeAs $as) => $as->getType(), $this->propertiesMeta));
         $this->namesMeta = array_filter(array_map(static fn(SerializeAs $as) => $as->getName(), $this->propertiesMeta));
     }
 

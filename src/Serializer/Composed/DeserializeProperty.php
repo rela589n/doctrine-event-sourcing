@@ -30,7 +30,7 @@ final class DeserializeProperty extends ComposedDeserializer
         private array $castArguments = [],
     ) {
         $this->propertiesMeta = array_map(static fn(SerializeAs $as) => $as, $this->propertiesMeta);
-        $this->typesMeta = array_map(static fn(SerializeAs $as) => $as->getType(), $this->propertiesMeta);
+        $this->typesMeta = array_filter(array_map(static fn(SerializeAs $as) => $as->getType(), $this->propertiesMeta));
         $this->namesMeta = array_filter(array_map(static fn(SerializeAs $as) => $as->getName(), $this->propertiesMeta));
     }
 
