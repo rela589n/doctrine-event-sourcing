@@ -1,0 +1,23 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <mapped-superclass name="Rela589n\DoctrineEventSourcing\Event\AggregateChanged">
+        <id name="id" type="bigint" column="id">
+            <generator/>
+        </id>
+
+        <field name="timestamp" type="datetimetz_immutable" column="timestamp"/>
+
+        <field name="payload" type="json">
+            <options>
+                <option name="jsonb"/>
+            </options>
+        </field>
+
+        <lifecycle-callbacks>
+            <lifecycle-callback type="preFlush" method="onPreFlush"/>
+            <lifecycle-callback type="postLoad" method="onPostLoad"/>
+        </lifecycle-callbacks>
+    </mapped-superclass>
+</doctrine-mapping>
