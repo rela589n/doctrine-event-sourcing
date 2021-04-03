@@ -6,10 +6,12 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateDeserializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 
+#[Immutable]
 final class DeserializeTyped implements SeparateDeserializer
 {
     public function __construct(

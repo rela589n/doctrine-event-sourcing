@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 
+#[Immutable]
 final class SerializeEntity implements SeparateSerializer
 {
     public function __construct(

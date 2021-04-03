@@ -6,12 +6,14 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo as ClassMetadata;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateDeserializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded;
 
+#[Immutable]
 final class DeserializeEmbedded implements SeparateDeserializer
 {
     public function __construct(

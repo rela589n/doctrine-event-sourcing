@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable;
 
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\Contract\Castable;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\Contract\CastsAttributes;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
 
+#[Immutable]
 final class SerializeCastable implements SeparateSerializer
 {
     public function __construct(

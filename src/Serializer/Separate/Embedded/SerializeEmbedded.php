@@ -6,12 +6,14 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo as ClassMetadata;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded;
 
+#[Immutable]
 final class SerializeEmbedded implements SeparateSerializer
 {
     public function __construct(
@@ -42,7 +44,7 @@ final class SerializeEmbedded implements SeparateSerializer
             && ($this->typeIsEmbedded)($value::class);
     }
 
-    public function __invoke(SerializationContext $context): mixed
+    public function __invoke(SerializationContext $context): array
     {
         $value = $context->getValue();
 

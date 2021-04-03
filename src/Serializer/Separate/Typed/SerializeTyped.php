@@ -6,10 +6,12 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateSerializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 
+#[Immutable]
 final class SerializeTyped implements SeparateSerializer
 {
     public function __construct(

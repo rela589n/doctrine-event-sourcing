@@ -6,12 +6,14 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity;
 
 use Doctrine\Common\Proxy\AbstractProxyFactory as ProxyFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateDeserializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\ResolvePrimaryType;
 
+#[Immutable]
 final class DeserializeEntity implements SeparateDeserializer
 {
     public function __construct(
