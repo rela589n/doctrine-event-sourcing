@@ -29,8 +29,8 @@ final class DeserializeEmbedded implements SeparateDeserializer
         return new self(
             $manager,
             $manager->getClassMetadata($entity::class),
-            new TypeIsEmbedded($manager),
-            ConvertToPHPValue::fromEntityManager($manager),
+            new TypeIsEmbedded\Impl($manager),
+            ConvertToPHPValue\Impl::fromEntityManager($manager),
         );
     }
 

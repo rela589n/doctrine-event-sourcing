@@ -22,7 +22,7 @@ final class SerializeEntity implements SeparateSerializer
 
     public static function from(EntityManagerInterface $manager): self
     {
-        return new self($manager, ConvertToDatabaseValue::fromEntityManager($manager));
+        return new self($manager, ConvertToDatabaseValue\Impl::fromEntityManager($manager));
     }
 
     public function isPossible(SerializationContext $context): bool

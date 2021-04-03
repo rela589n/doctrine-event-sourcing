@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Stub\ReturnValueMap;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 
-final class ConvertToPHPValueMock extends ConvertToPHPValue
+final class ConvertToPHPValueMock implements ConvertToPHPValue
 {
     private ReturnValueMap $shouldReturn;
 

@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-
 namespace Tests\Unit\Serializer\Mocks\Types;
 
 use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Stub\ReturnValueMap;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded;
 
-final class TypeIsEmbeddedMock extends TypeIsEmbedded
+final class TypeIsEmbeddedMock implements TypeIsEmbedded
 {
     private ReturnValueMap $shouldReturn;
 

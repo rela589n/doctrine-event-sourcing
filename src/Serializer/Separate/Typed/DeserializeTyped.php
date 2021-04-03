@@ -23,7 +23,7 @@ final class DeserializeTyped implements SeparateDeserializer
 
     public static function from(EntityManagerInterface $manager, array $propertiesTypes): self
     {
-        return new self(ConvertToPHPValue::fromEntityManager($manager), $propertiesTypes);
+        return new self(ConvertToPHPValue\Impl::fromEntityManager($manager), $propertiesTypes);
     }
 
     public function isPossible(DeserializationContext $context): bool

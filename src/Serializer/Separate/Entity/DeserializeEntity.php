@@ -27,8 +27,8 @@ final class DeserializeEntity implements SeparateDeserializer
     {
         return new self(
             $manager->getProxyFactory(),
-            ConvertToPHPValue::fromEntityManager($manager),
-            new ResolvePrimaryType($manager),
+            ConvertToPHPValue\Impl::fromEntityManager($manager),
+            new ResolvePrimaryType\Impl($manager),
         );
     }
 

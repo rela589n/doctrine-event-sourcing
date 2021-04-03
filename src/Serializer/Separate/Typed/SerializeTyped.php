@@ -23,7 +23,7 @@ final class SerializeTyped implements SeparateSerializer
 
     public static function from(EntityManagerInterface $manager, array $propertiesTypes): self
     {
-        return new self(ConvertToDatabaseValue::fromEntityManager($manager), $propertiesTypes);
+        return new self(ConvertToDatabaseValue\Impl::fromEntityManager($manager), $propertiesTypes);
     }
 
     public function isPossible(SerializationContext $context): bool

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace Tests\Unit\Serializer\Mocks\Types;
 
 use Doctrine\DBAL\Types\Type;
@@ -10,7 +9,7 @@ use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Stub\ReturnValueMap;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\ResolvePrimaryType;
 
-final class ResolvePrimaryTypeMock extends ResolvePrimaryType
+final class ResolvePrimaryTypeMock implements ResolvePrimaryType
 {
     private ReturnValueMap $shouldReturn;
 

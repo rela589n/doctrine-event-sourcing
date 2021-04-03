@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Stub\ReturnValueMap;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 
-final class ConvertToDatabaseValueMock extends ConvertToDatabaseValue
+final class ConvertToDatabaseValueMock implements ConvertToDatabaseValue
 {
     private ReturnValueMap $shouldReturn;
 

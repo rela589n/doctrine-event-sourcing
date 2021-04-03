@@ -24,15 +24,13 @@ final class SerializeEmbedded implements SeparateSerializer
     ) {
     }
 
-    public static function from(
-        EntityManagerInterface $manager,
-        AggregateRoot $entity,
-    ): self {
+    public static function from(EntityManagerInterface $manager, AggregateRoot $entity): self
+    {
         return new self(
             $manager,
             $manager->getClassMetadata($entity::class),
-            new TypeIsEmbedded($manager),
-            ConvertToDatabaseValue::fromEntityManager($manager),
+            new TypeIsEmbedded\Impl($manager),
+            ConvertToDatabaseValue\Impl::fromEntityManager($manager),
         );
     }
 
