@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-
 namespace Rela589n\DoctrineEventSourcing\Serializer\Pipeline\Pipes;
 
+use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Pipeline\SerializationContextPipe;
 
+#[Immutable]
 final class SubstituteAnnotatedSerializeName implements SerializationContextPipe
 {
     public function __construct(private array $namesMeta) { }
