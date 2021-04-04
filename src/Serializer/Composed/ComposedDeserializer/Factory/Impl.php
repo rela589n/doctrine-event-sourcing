@@ -59,8 +59,8 @@ final class Impl extends Factory
     {
         yield DeserializeTyped::from($this->manager, $this->typesMeta);
         yield DeserializeEntity::from($this->manager);
-        yield DeserializeEmbedded::from($this->manager, $this->entity);
         yield DeserializeCastable::from($this->entity, $this->castArgumentsMap);
+        yield DeserializeEmbedded::from($this->manager, $this->entity);
         yield DeserializeNoop::instance();
     }
 }
