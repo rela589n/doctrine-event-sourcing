@@ -18,6 +18,14 @@ use Rela589n\DoctrineEventSourcing\Serializer\Separate\Noop\SerializeNoop;
  */
 final class NoopSerializerTest extends TestCase
 {
+    public function testNoopSerializeIsAlwaysPossible(): void
+    {
+        $serialize = SerializeNoop::instance();
+        $context = SerializationContext::make();
+
+        self::assertTrue($serialize->isPossible($context));
+    }
+
     public function testReturnsSameValueWhenSerializing(): void
     {
         $serialize = SerializeNoop::instance();
@@ -29,12 +37,33 @@ final class NoopSerializerTest extends TestCase
         self::assertSame('the value', $serialize($context));
     }
 
+    public function testNoopDeserializeIsPossibleWhenHasSuchSerializedField(): void
+    {
+        $deserialize = DeserializeNoop::instance();
+        $context = DeserializationContext::make()
+            ->withFieldName('field')
+            ->withSerialized(['field' => 'serialized']);
+        self::assertTrue($deserialize->isPossible($context));
+    }
+
+    public function testNoopDeserializeIsNotPossibleWhenHasNoSuchSerializedField(): void
+    {
+        $deserialize = DeserializeNoop::instance();
+        $context = DeserializationContext::make()
+            ->withFieldName('field')
+            ->withSerialized(['another' => 'serialized']);
+
+        self::assertFalse($deserialize->isPossible($context));
+    }
+
     public function testReturnsOriginalSerializedValueWhenDeserializing(): void
     {
         $deserialize = DeserializeNoop::instance();
         $context = DeserializationContext::make()
-            ->withSerialized(['serialized']);
+            ->withFieldName('someField')
+            ->withSerialized(['someField' => 'serialized']);
+
         self::assertTrue($deserialize->isPossible($context));
-        self::assertSame(['serialized'], $deserialize($context));
+        self::assertSame('serialized', $deserialize($context));
     }
 }

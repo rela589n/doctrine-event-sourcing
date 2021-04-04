@@ -21,11 +21,11 @@ final class DeserializeNoop implements SeparateDeserializer
 
     public function isPossible(DeserializationContext $context): bool
     {
-        return true;
+        return isset($context->getSerialized()[$context->getFieldName()]);
     }
 
     public function __invoke(DeserializationContext $context): mixed
     {
-        return $context->getSerialized();
+        return $context->getSerialized()[$context->getFieldName()];
     }
 }

@@ -24,19 +24,19 @@ final class ComposedDeserializerTest extends TestCase
     {
         $originalContext = DeserializationContext::make()
             ->withFieldName('original')
-            ->withSerialized('serialized original');
+            ->withSerialized(['original' => 'serialized original']);
 
         $pipe1 = $this->createMock(DeserializationContextPipe::class);
         $context1 = DeserializationContext::make()
             ->withFieldName('pipe1')
-            ->withSerialized('serialized amended');
+            ->withSerialized(['pipe1' => 'serialized amended']);
         $pipe1->method('__invoke')
             ->willReturnMap([[$originalContext, $context1]]);
 
         $pipe2 = $this->createMock(DeserializationContextPipe::class);
         $context2 = DeserializationContext::make()
             ->withFieldName('pipe2')
-            ->withSerialized('serialized amended 2');
+            ->withSerialized(['pipe2' => 'serialized amended 2']);
         $pipe2->method('__invoke')
             ->willReturnMap([[$context1, $context2]]);
 
@@ -98,7 +98,7 @@ final class ComposedDeserializerTest extends TestCase
         $pipe = $this->createMock(DeserializationContextPipe::class);
         $context = DeserializationContext::make()
             ->withFieldName('fieldName')
-            ->withSerialized('serialized value');
+            ->withSerialized(['fieldName' => 'serialized value']);
 
         $pipedContext = clone $context;
         $pipe->method('__invoke')
