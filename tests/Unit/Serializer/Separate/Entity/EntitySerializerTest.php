@@ -13,8 +13,8 @@ use PHPUnit\Framework\TestCase;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\SerializeEntity;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 use Tests\Mocks\AggregateRootMock;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
 
 /**
  * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\SerializeEntity
@@ -22,9 +22,9 @@ use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
  */
 final class EntitySerializerTest extends TestCase
 {
-    private EntityManagerInterface|MockObject $entityManager;
-    private ClassMetadata|MockObject $classMetadata;
-    private ConvertToDatabaseValueMock $convertToDatabaseValue;
+    private MockObject|EntityManagerInterface $entityManager;
+    private MockObject|ClassMetadata $classMetadata;
+    private MockObject|ConvertToDatabaseValue $convertToDatabaseValue;
     private SerializeEntity $serializer;
 
     protected function setUp(): void
@@ -72,13 +72,8 @@ final class EntitySerializerTest extends TestCase
             ->willReturnMap([[AggregateRootMock::class, $this->classMetadata]]);
 
         $this->convertToDatabaseValue
-            ->will(
-                self::returnValueMap(
-                    [
-                        ['dbal_type', $primary, 'serialized'.$primary]
-                    ]
-                )
-            );
+            ->method('__invoke')
+            ->willReturnMap([['dbal_type', $primary, 'serialized'.$primary]]);
 
         self::assertSame(
             'serialized'.$primary,
@@ -91,7 +86,7 @@ final class EntitySerializerTest extends TestCase
         );
     }
 
-    private function setUpSerializer()
+    private function setUpSerializer(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $connection = $this->createMock(Connection::class);
@@ -105,7 +100,7 @@ final class EntitySerializerTest extends TestCase
 
         $this->classMetadata = $this->createMock(ClassMetadata::class);
 
-        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
+        $this->convertToDatabaseValue = $this->createMock(ConvertToDatabaseValue::class);
         $this->serializer = new SerializeEntity($this->entityManager, $this->convertToDatabaseValue);
     }
 }
