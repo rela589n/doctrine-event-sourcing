@@ -57,10 +57,10 @@ class Message implements AggregateRoot
         return $message;
     }
 
-    public function edit(MessageContent $newContent): void
+    public function edit(MessageContent $newContent, bool $showWasEdited): void
     {
         $this->recordThat(
-            MessageWasEdited::with($this, $this->content, $newContent),
+            MessageWasEdited::with($this, $this->content, $newContent, $showWasEdited),
         );
     }
 
@@ -102,5 +102,14 @@ class Message implements AggregateRoot
     public static function getPrimaryName(): string
     {
         return 'uuid';
+    }
+
+    /**
+     * This method provides access to private properties for testing.
+     * In real application you'd never have such method.
+     */
+    public function _test_prop(string $name)
+    {
+        return $this->{$name};
     }
 }
