@@ -10,7 +10,8 @@
     "require-dev": {
         "phpunit/phpunit": "^9.0",
         "beberlei/doctrineextensions": "^1.3",
-        "nesbot/carbon": "^2.46"
+        "nesbot/carbon": "^2.46",
+        "vlucas/phpdotenv": "^5.3"
     },
     "license": "MIT",
     "authors": [
