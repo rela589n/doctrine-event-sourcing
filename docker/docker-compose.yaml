@@ -1,0 +1,44 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      args:
+        uname: ${PHP_UNAME}
+        uid: ${PHP_UID}
+        gid: ${PHP_GID}
+      context: ./services/app
+    container_name: ${PROJECT_NAME}_app
+    image: ${PROJECT_NAME}_php
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./services/app/php.ini:/usr/local/etc/php/php.ini
+      - ../:/var/www
+    environment:
+      COMPOSER_MEMORY_LIMIT: 3G
+      XDEBUG_CONFIG: client_host=${XDEBUG_REMOTE_HOST} client_port=${XDEBUG_STORM_PORT}
+      PHP_IDE_CONFIG: serverName=${XDEBUG_STORM_SERVER_NAME}
+    networks:
+      - main_network
+  test_db:
+    image: postgres:13-alpine
+    restart: unless-stopped
+    container_name: ${PROJECT_NAME}_test_db
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${TEST_DB_LOCAL_PORT}:5432
+    networks:
+      - main_network
+
+networks:
+  main_network:
+    driver: bridge
+    name: ${PROJECT_NAME}_main_network
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET_IP}/${SUBNET_MASK}
