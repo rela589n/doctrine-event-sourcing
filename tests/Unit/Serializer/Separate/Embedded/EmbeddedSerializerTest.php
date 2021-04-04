@@ -45,9 +45,7 @@ final class EmbeddedSerializerTest extends TestCase
             ->willReturnMap([[stdClass::class, true]]);
 
         $context = SerializationContext::make()
-            ->withFieldName('')
-            ->withValue(new stdClass())
-            ->withAttributes([]);
+            ->withValue(new stdClass());
         self::assertTrue($this->serializer->isPossible($context));
     }
 
@@ -59,9 +57,7 @@ final class EmbeddedSerializerTest extends TestCase
             ->willReturnMap([[stdClass::class, false]]);
 
         $context = SerializationContext::make()
-            ->withFieldName('')
-            ->withValue(new stdClass())
-            ->withAttributes([]);
+            ->withValue(new stdClass());
         self::assertFalse($this->serializer->isPossible($context));
     }
 
@@ -71,9 +67,7 @@ final class EmbeddedSerializerTest extends TestCase
         self::assertFalse(
             $this->serializer->isPossible(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue('not an object')
-                    ->withAttributes([])
             )
         );
     }
@@ -129,7 +123,6 @@ final class EmbeddedSerializerTest extends TestCase
             SerializationContext::make()
                 ->withFieldName('property')
                 ->withValue($valueObject)
-                ->withAttributes([])
         );
         self::assertIsArray($serialized);
 

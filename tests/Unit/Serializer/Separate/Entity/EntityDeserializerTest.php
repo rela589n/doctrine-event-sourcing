@@ -47,9 +47,7 @@ final class EntityDeserializerTest extends TestCase
         self::assertTrue(
             $this->deserializer->isPossible(
                 DeserializationContext::make()
-                    ->withFieldName('')
                     ->withType($entity::class)
-                    ->withSerialized([])
             )
         );
     }
@@ -60,9 +58,7 @@ final class EntityDeserializerTest extends TestCase
         self::assertFalse(
             $this->deserializer->isPossible(
                 DeserializationContext::make()
-                    ->withFieldName('')
                     ->withType($notEntity::class)
-                    ->withSerialized([])
             )
         );
     }

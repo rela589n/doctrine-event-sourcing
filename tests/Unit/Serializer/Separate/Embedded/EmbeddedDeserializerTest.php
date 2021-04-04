@@ -47,9 +47,7 @@ final class EmbeddedDeserializerTest extends TestCase
         self::assertTrue(
             $this->deserializer->isPossible(
                 DeserializationContext::make()
-                    ->withFieldName('')
                     ->withType(stdClass::class)
-                    ->withSerialized([])
             )
         );
     }
@@ -63,11 +61,7 @@ final class EmbeddedDeserializerTest extends TestCase
         self::assertFalse(
             $this->deserializer->isPossible(
                 DeserializationContext::make()
-                    ->withFieldName('')
                     ->withType(stdClass::class)
-                    ->withSerialized(
-                        []
-                    )
             )
         );
     }

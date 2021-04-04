@@ -44,8 +44,6 @@ final class TypedSerializerTest extends TestCase
             $this->serializer->isPossible(
                 SerializationContext::make()
                     ->withFieldName('property')
-                    ->withValue('')
-                    ->withAttributes([])
             )
         );
     }
@@ -62,8 +60,6 @@ final class TypedSerializerTest extends TestCase
             $this->serializer->isPossible(
                 SerializationContext::make()
                     ->withFieldName('property')
-                    ->withValue('')
-                    ->withAttributes([])
             )
         );
     }
@@ -83,7 +79,6 @@ final class TypedSerializerTest extends TestCase
                 SerializationContext::make()
                     ->withFieldName('another')
                     ->withValue(true)
-                    ->withAttributes([])
             ),
         );
     }

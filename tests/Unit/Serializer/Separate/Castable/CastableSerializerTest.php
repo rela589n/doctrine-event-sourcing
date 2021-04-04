@@ -27,9 +27,7 @@ final class CastableSerializerTest extends TestCase
         self::assertTrue(
             $serialize->isPossible(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue($castable)
-                    ->withAttributes([])
             )
         );
     }
@@ -43,9 +41,7 @@ final class CastableSerializerTest extends TestCase
         self::assertFalse(
             $serialize->isPossible(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue($notCastable)
-                    ->withAttributes([])
             )
         );
     }

@@ -39,9 +39,7 @@ final class EntitySerializerTest extends TestCase
         self::assertTrue(
             $this->serializer->isPossible(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue($entity)
-                    ->withAttributes([])
             )
         );
     }
@@ -52,9 +50,7 @@ final class EntitySerializerTest extends TestCase
         self::assertFalse(
             $this->serializer->isPossible(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue($notEntity)
-                    ->withAttributes([])
             )
         );
     }
@@ -79,9 +75,7 @@ final class EntitySerializerTest extends TestCase
             'serialized'.$primary,
             ($this->serializer)(
                 SerializationContext::make()
-                    ->withFieldName('')
                     ->withValue($entity)
-                    ->withAttributes([])
             )
         );
     }

@@ -45,7 +45,6 @@ final class TypedDeserializerTest extends TestCase
             $this->deserializer->isPossible(
                 DeserializationContext::make()
                     ->withFieldName('property')
-                    ->withSerialized([])
             )
         );
     }
@@ -62,7 +61,6 @@ final class TypedDeserializerTest extends TestCase
             $this->deserializer->isPossible(
                 DeserializationContext::make()
                     ->withFieldName('property')
-                    ->withSerialized([])
             )
         );
     }

@@ -23,9 +23,7 @@ final class NoopSerializerTest extends TestCase
         $serialize = SerializeNoop::instance();
 
         $context = SerializationContext::make()
-            ->withFieldName('whatever')
-            ->withValue('the value')
-            ->withAttributes(['whatever']);
+            ->withValue('the value');
 
         self::assertTrue($serialize->isPossible($context));
         self::assertSame('the value', $serialize($context));
@@ -35,8 +33,6 @@ final class NoopSerializerTest extends TestCase
     {
         $deserialize = DeserializeNoop::instance();
         $context = DeserializationContext::make()
-            ->withFieldName('whatever')
-            ->withType('whatever')
             ->withSerialized(['serialized']);
         self::assertTrue($deserialize->isPossible($context));
         self::assertSame(['serialized'], $deserialize($context));
