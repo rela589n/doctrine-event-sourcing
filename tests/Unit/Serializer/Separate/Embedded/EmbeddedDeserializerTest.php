@@ -19,6 +19,11 @@ use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
 use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\DeserializeEmbedded
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded\Impl
+ */
 final class EmbeddedDeserializerTest extends TestCase
 {
     private EntityManagerInterface|MockObject $manager;
@@ -38,7 +43,14 @@ final class EmbeddedDeserializerTest extends TestCase
         $this->typeIsEmbedded->will(self::returnValueMap([[stdClass::class, true]]));
 
         $this->setupDeserializer($this->createMock(ClassMetadataInfo::class));
-        self::assertTrue($this->deserializer->isPossible(new DeserializationContext('', stdClass::class, [])));
+        self::assertTrue(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('')
+                    ->withType(stdClass::class)
+                    ->withSerialized([])
+            )
+        );
     }
 
     public function testCantBeDeserializedIfTypeIsNotEmbedded(): void
@@ -46,7 +58,16 @@ final class EmbeddedDeserializerTest extends TestCase
         $this->typeIsEmbedded->will(self::returnValueMap([[stdClass::class, false]]));
 
         $this->setupDeserializer($this->createMock(ClassMetadataInfo::class));
-        self::assertFalse($this->deserializer->isPossible(new DeserializationContext('', stdClass::class, [])));
+        self::assertFalse(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('')
+                    ->withType(stdClass::class)
+                    ->withSerialized(
+                        []
+                    )
+            )
+        );
     }
 
     public function testDeserializeEmbedded(): void
@@ -64,7 +85,7 @@ final class EmbeddedDeserializerTest extends TestCase
         $valueMeta->reflClass = new ReflectionClass(EmbeddedValueObject::class);
 
         $this->manager->method('getClassMetadata')
-                      ->willReturnMap([[EmbeddedValueObject::class, $valueMeta]]);
+            ->willReturnMap([[EmbeddedValueObject::class, $valueMeta]]);
 
         $entityMeta = $this->createMock(ClassMetadataInfo::class);
         $entityMeta->fieldMappings = [
@@ -99,17 +120,18 @@ final class EmbeddedDeserializerTest extends TestCase
 
         /** @var EmbeddedValueObject $original */
         $original = $this->deserializer->__invoke(
-            new DeserializationContext(
-                'name',
-                EmbeddedValueObject::class,
-                [
-                    'name' => [
-                        'p1' => 'first serialized',
-                        'p2' => 'second serialized',
+            DeserializationContext::make()
+                ->withFieldName('name')
+                ->withType(EmbeddedValueObject::class)
+                ->withSerialized(
+                    [
+                        'name' => [
+                            'p1' => 'first serialized',
+                            'p2' => 'second serialized',
+                        ],
+                        'whatever' => ['else'],
                     ],
-                    'whatever' => ['else'],
-                ],
-            )
+                ),
         );
 
         self::assertSame('first value', $original->getProperty1());
@@ -123,16 +145,16 @@ final class EmbeddedDeserializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->manager->method('getConnection')
-                      ->willReturn($connection);
+            ->willReturn($connection);
     }
 
     private function setupMisc(): void
     {
-        $this->typeIsEmbedded = new TypeIsEmbeddedMock($this->manager);
-        $this->convertToPHPValue = ConvertToPHPValueMock::fromEntityManager($this->manager);
+        $this->typeIsEmbedded = new TypeIsEmbeddedMock();
+        $this->convertToPHPValue = new ConvertToPHPValueMock();
     }
 
     private function setupDeserializer(ClassMetadataInfo $entityMetadata): void

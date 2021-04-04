@@ -18,6 +18,11 @@ use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
 use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\SerializeEmbedded
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded\Impl
+ */
 final class EmbeddedSerializerTest extends TestCase
 {
     private EntityManagerInterface|MockObject $manager;
@@ -39,7 +44,10 @@ final class EmbeddedSerializerTest extends TestCase
             self::returnValueMap([[stdClass::class, true]])
         );
 
-        $context = new SerializationContext('', new stdClass(), []);
+        $context = SerializationContext::make()
+            ->withFieldName('')
+            ->withValue(new stdClass())
+            ->withAttributes([]);
         self::assertTrue($this->serializer->isPossible($context));
     }
 
@@ -50,14 +58,24 @@ final class EmbeddedSerializerTest extends TestCase
             self::returnValueMap([[stdClass::class, false]])
         );
 
-        $context = new SerializationContext('', new stdClass(), []);
+        $context = SerializationContext::make()
+            ->withFieldName('')
+            ->withValue(new stdClass())
+            ->withAttributes([]);
         self::assertFalse($this->serializer->isPossible($context));
     }
 
     public function testCantBeSerializedIfTypeIsNotObject(): void
     {
         $this->setUpSerializer($this->createMock(ClassMetadataInfo::class));
-        self::assertFalse($this->serializer->isPossible(new SerializationContext('', 'Not An Object', [])));
+        self::assertFalse(
+            $this->serializer->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue('not an object')
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testSerializeEmbedded(): void
@@ -73,7 +91,7 @@ final class EmbeddedSerializerTest extends TestCase
         $valueMeta->reflFields['property2'] = $reflFieldSecond;
 
         $this->manager->method('getClassMetadata')
-                      ->willReturnMap([[EmbeddedValueObject::class, $valueMeta]]);
+            ->willReturnMap([[EmbeddedValueObject::class, $valueMeta]]);
 
         $entityMeta = $this->createMock(ClassMetadataInfo::class);
         $entityMeta->fieldMappings = [
@@ -108,7 +126,12 @@ final class EmbeddedSerializerTest extends TestCase
                 ),
             );
 
-        $serialized = $this->serializer->__invoke(new SerializationContext('property', $valueObject, []));
+        $serialized = $this->serializer->__invoke(
+            SerializationContext::make()
+                ->withFieldName('property')
+                ->withValue($valueObject)
+                ->withAttributes([])
+        );
         self::assertIsArray($serialized);
 
         self::assertSame(
@@ -127,16 +150,16 @@ final class EmbeddedSerializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->manager->method('getConnection')
-                      ->willReturn($connection);
+            ->willReturn($connection);
     }
 
     private function setupMisc(): void
     {
-        $this->typeIsEmbedded = new TypeIsEmbeddedMock($this->manager);
-        $this->convertToDatabaseValue = ConvertToDatabaseValueMock::fromEntityManager($this->manager);
+        $this->typeIsEmbedded = new TypeIsEmbeddedMock();
+        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
     }
 
     private function setUpSerializer(ClassMetadataInfo $entityMeta): void

@@ -16,6 +16,10 @@ use Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\SerializeEntity;
 use Tests\Mocks\AggregateRootMock;
 use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\SerializeEntity
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext
+ */
 final class EntitySerializerTest extends TestCase
 {
     private EntityManagerInterface|MockObject $entityManager;
@@ -32,13 +36,27 @@ final class EntitySerializerTest extends TestCase
     public function testCanBeSerializedIfItsEntity(): void
     {
         $entity = $this->createMock(AggregateRoot::class);
-        self::assertTrue($this->serializer->isPossible(new SerializationContext('', $entity, [])));
+        self::assertTrue(
+            $this->serializer->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue($entity)
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testCantBeSerializedIfItsNotEntity(): void
     {
         $notEntity = $this->createMock(EntityManagerInterface::class);
-        self::assertFalse($this->serializer->isPossible(new SerializationContext('', $notEntity, [])));
+        self::assertFalse(
+            $this->serializer->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue($notEntity)
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testSerializesEntityUsingPrimary(): void
@@ -48,10 +66,10 @@ final class EntitySerializerTest extends TestCase
         AggregateRootMock::setPrimaryName('uuid');
 
         $this->classMetadata->method('getFieldMapping')
-                            ->willReturnMap([['uuid', ['type' => 'dbal_type']]]);
+            ->willReturnMap([['uuid', ['type' => 'dbal_type']]]);
 
         $this->entityManager->method('getClassMetadata')
-                            ->willReturnMap([[AggregateRootMock::class, $this->classMetadata]]);
+            ->willReturnMap([[AggregateRootMock::class, $this->classMetadata]]);
 
         $this->convertToDatabaseValue
             ->will(
@@ -62,7 +80,15 @@ final class EntitySerializerTest extends TestCase
                 )
             );
 
-        self::assertSame('serialized'.$primary, ($this->serializer)(new SerializationContext('', $entity, [])));
+        self::assertSame(
+            'serialized'.$primary,
+            ($this->serializer)(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue($entity)
+                    ->withAttributes([])
+            )
+        );
     }
 
     private function setUpSerializer()
@@ -72,14 +98,14 @@ final class EntitySerializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->entityManager->method('getConnection')
-                            ->willReturn($connection);
+            ->willReturn($connection);
 
         $this->classMetadata = $this->createMock(ClassMetadata::class);
 
-        $this->convertToDatabaseValue = ConvertToDatabaseValueMock::fromEntityManager($this->entityManager);
+        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
         $this->serializer = new SerializeEntity($this->entityManager, $this->convertToDatabaseValue);
     }
 }

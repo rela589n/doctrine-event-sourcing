@@ -20,6 +20,10 @@ use Tests\Mocks\AggregateRootMock;
 use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
 use Tests\Unit\Serializer\Mocks\Types\ResolvePrimaryTypeMock;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\DeserializeEntity
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext
+ */
 final class EntityDeserializerTest extends TestCase
 {
     private MockObject|EntityManagerInterface $manager;
@@ -38,13 +42,27 @@ final class EntityDeserializerTest extends TestCase
     public function testCanBeDeserializedIfItsEntity(): void
     {
         $entity = $this->createMock(AggregateRoot::class);
-        self::assertTrue($this->deserializer->isPossible(new DeserializationContext('', $entity::class, [])));
+        self::assertTrue(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('')
+                    ->withType($entity::class)
+                    ->withSerialized([])
+            )
+        );
     }
 
     public function testCentBeDeserializedIfItsNotEntity(): void
     {
         $notEntity = $this->createMock(EntityManagerInterface::class);
-        self::assertFalse($this->deserializer->isPossible(new DeserializationContext('', $notEntity::class, [])));
+        self::assertFalse(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('')
+                    ->withType($notEntity::class)
+                    ->withSerialized([])
+            )
+        );
     }
 
     public function testDeserializeEntityUsingPrimary(): void
@@ -80,15 +98,20 @@ final class EntityDeserializerTest extends TestCase
         $user = new AggregateRootMock($primary);
 
         $this->proxyFactory->method('getProxy')
-                           ->willReturnMap(
-                               [
-                                   [AggregateRootMock::class, ['uuid' => $resolvedPrimary], $user]
-                               ]
-                           );
+            ->willReturnMap(
+                [
+                    [AggregateRootMock::class, ['uuid' => $resolvedPrimary], $user]
+                ]
+            );
 
         self::assertSame(
             $user,
-            ($this->deserializer)(new DeserializationContext('user', AggregateRootMock::class, $serialized)),
+            ($this->deserializer)(
+                DeserializationContext::make()
+                    ->withFieldName('user')
+                    ->withType(AggregateRootMock::class)
+                    ->withSerialized($serialized)
+            ),
         );
     }
 
@@ -99,17 +122,17 @@ final class EntityDeserializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->manager->method('getConnection')
-                      ->willReturn($connection);
+            ->willReturn($connection);
     }
 
     private function setUpDeserializer()
     {
-        $this->convertToPHPValue = ConvertToPHPValueMock::fromEntityManager($this->manager);
+        $this->convertToPHPValue = new ConvertToPHPValueMock();
         $this->proxyFactory = $this->createMock(AbstractProxyFactory::class);
-        $this->resolvePrimaryTypeMock = new ResolvePrimaryTypeMock($this->manager);
+        $this->resolvePrimaryTypeMock = new ResolvePrimaryTypeMock();
         $this->deserializer = new DeserializeEntity(
             $this->proxyFactory,
             $this->convertToPHPValue,

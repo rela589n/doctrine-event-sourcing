@@ -19,11 +19,6 @@ final class SubstituteAnnotatedDeserializeName implements DeserializationContext
             return $context;
         }
 
-        return new DeserializationContext(
-            $context->getFieldName(),
-            $context->getType(),
-            $context->getSerialized(),
-            $this->namesMeta[$context->getFieldName()],
-        );
+        return $context->withName($this->namesMeta[$context->getFieldName()]);
     }
 }

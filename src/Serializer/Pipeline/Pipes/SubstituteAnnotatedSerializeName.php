@@ -19,11 +19,6 @@ final class SubstituteAnnotatedSerializeName implements SerializationContextPipe
             return $context;
         }
 
-        return new SerializationContext(
-            $context->getFieldName(),
-            $context->getValue(),
-            $context->getAttributes(),
-            $this->namesMeta[$context->getFieldName()],
-        );
+        return $context->withName($this->namesMeta[$context->getFieldName()]);
     }
 }

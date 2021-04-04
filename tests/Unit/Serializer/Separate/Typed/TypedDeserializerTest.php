@@ -16,6 +16,10 @@ use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\DeserializeTyped;
 use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\DeserializeTyped
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext
+ */
 final class TypedDeserializerTest extends TestCase
 {
     private EntityManagerInterface|MockObject $manager;
@@ -26,7 +30,7 @@ final class TypedDeserializerTest extends TestCase
     {
         parent::setUp();
         $this->setupEntityManager();
-        $this->convertToPHPValue = ConvertToPHPValueMock::fromEntityManager($this->manager);
+        $this->convertToPHPValue = new ConvertToPHPValueMock();
     }
 
     public function testCanBeDeserializedIfHasRegisteredType(): void
@@ -37,7 +41,14 @@ final class TypedDeserializerTest extends TestCase
             ]
         );
 
-        self::assertTrue($this->deserializer->isPossible(new DeserializationContext('property', '', [])));
+        self::assertTrue(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('property')
+
+                    ->withSerialized([])
+            )
+        );
     }
 
     public function testCantBeDeserializedIfHasNoRegisteredType(): void
@@ -48,7 +59,14 @@ final class TypedDeserializerTest extends TestCase
             ]
         );
 
-        self::assertFalse($this->deserializer->isPossible(new DeserializationContext('property', '', [])));
+        self::assertFalse(
+            $this->deserializer->isPossible(
+                DeserializationContext::make()
+                    ->withFieldName('property')
+
+                    ->withSerialized([])
+            )
+        );
     }
 
     public function testDeserializeUsingType(): void
@@ -65,7 +83,10 @@ final class TypedDeserializerTest extends TestCase
         self::assertSame(
             'serialization result',
             $this->deserializer->__invoke(
-                new DeserializationContext('another', DateTime::class, ['another' => ['serialized']])
+                DeserializationContext::make()
+                    ->withFieldName('another')
+                    ->withType(DateTime::class)
+                    ->withSerialized(['another' => ['serialized']])
             ),
         );
     }
@@ -77,10 +98,10 @@ final class TypedDeserializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->manager->method('getConnection')
-                      ->willReturn($connection);
+            ->willReturn($connection);
     }
 
     private function setUpDeserializer(array $propertiesTypes): void

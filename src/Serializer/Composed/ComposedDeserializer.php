@@ -2,22 +2,39 @@
 
 declare(strict_types=1);
 
-
 namespace Rela589n\DoctrineEventSourcing\Serializer\Composed;
 
+use Closure;
+use JetBrains\PhpStorm\Immutable;
 use LogicException;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
+use Rela589n\DoctrineEventSourcing\Serializer\Pipeline\DeserializationContextPipe;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\SeparateDeserializer;
 
-abstract class ComposedDeserializer
+#[Immutable]
+final class ComposedDeserializer
 {
+    /** @var Closure(DeserializationContext):iterable<DeserializationContextPipe> */
+    private Closure $pipes;
+
+    /** @var Closure(DeserializationContext):iterable<SeparateDeserializer> */
+    private Closure $deserializers;
+
+    public function __construct(Closure $pipes, Closure $deserializers)
+    {
+        $this->pipes = $pipes;
+        $this->deserializers = $deserializers;
+    }
+
     public function __invoke(DeserializationContext $context): mixed
     {
-        foreach ($this->pipes($context) as $pipe) {
+        /** @var DeserializationContextPipe $pipe */
+        foreach (($this->pipes)($context) as $pipe) {
             $context = $pipe($context);
         }
 
-        foreach ($this->deserializers() as $deserialize) {
+        /** @var SeparateDeserializer $deserialize */
+        foreach (($this->deserializers)($context) as $deserialize) {
             if ($deserialize->isPossible($context)) {
                 return $deserialize($context);
             }
@@ -25,13 +42,4 @@ abstract class ComposedDeserializer
 
         throw new LogicException("No deserializer matches context for '{$context->getName()}' property");
     }
-
-    /** @return iterable<DeserializationContext> */
-    protected function pipes(DeserializationContext $context): iterable
-    {
-        return [];
-    }
-
-    /** @return iterable<SeparateDeserializer> */
-    abstract protected function deserializers(): iterable;
 }

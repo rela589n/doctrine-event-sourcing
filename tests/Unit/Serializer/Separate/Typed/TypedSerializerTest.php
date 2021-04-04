@@ -15,6 +15,10 @@ use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\SerializeTyped;
 use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\SerializeTyped
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext
+ */
 final class TypedSerializerTest extends TestCase
 {
     private EntityManagerInterface|MockObject $manager;
@@ -25,7 +29,7 @@ final class TypedSerializerTest extends TestCase
     {
         parent::setUp();
         $this->setupEntityManager();
-        $this->convertToDatabaseValue = ConvertToDatabaseValueMock::fromEntityManager($this->manager);
+        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
     }
 
     public function testCanBeSerializedIfHasRegisteredType(): void
@@ -36,7 +40,14 @@ final class TypedSerializerTest extends TestCase
             ]
         );
 
-        self::assertTrue($this->serializer->isPossible(new SerializationContext('property', '', [])));
+        self::assertTrue(
+            $this->serializer->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('property')
+                    ->withValue('')
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testCantBeSerializedIfHasNoRegisteredType(): void
@@ -47,7 +58,14 @@ final class TypedSerializerTest extends TestCase
             ]
         );
 
-        self::assertFalse($this->serializer->isPossible(new SerializationContext('property', '', [])));
+        self::assertFalse(
+            $this->serializer->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('property')
+                    ->withValue('')
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testSerializeUsingType(): void
@@ -65,7 +83,12 @@ final class TypedSerializerTest extends TestCase
 
         self::assertSame(
             'true',
-            $this->serializer->__invoke(new SerializationContext('another', true, [])),
+            $this->serializer->__invoke(
+                SerializationContext::make()
+                    ->withFieldName('another')
+                    ->withValue(true)
+                    ->withAttributes([])
+            ),
         );
     }
 
@@ -76,10 +99,10 @@ final class TypedSerializerTest extends TestCase
         $platform = $this->createMock(AbstractPlatform::class);
 
         $connection->method('getDatabasePlatform')
-                   ->willReturn($platform);
+            ->willReturn($platform);
 
         $this->manager->method('getConnection')
-                      ->willReturn($connection);
+            ->willReturn($connection);
     }
 
     private function setUpSerializer(array $propertiesTypes): void

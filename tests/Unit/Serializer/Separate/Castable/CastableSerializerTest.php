@@ -12,6 +12,10 @@ use Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\Contract\CastsAt
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\SerializeCastable;
 use Tests\Unit\Serializer\Separate\Castable\Mocks\CastableValueObject;
 
+/**
+ * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Castable\SerializeCastable
+ * @uses   \Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext
+ */
 final class CastableSerializerTest extends TestCase
 {
     public function testCanBeSerializedIfImplementsCastable(): void
@@ -20,7 +24,14 @@ final class CastableSerializerTest extends TestCase
         $castable = $this->createMock(Castable::class);
         $serialize = SerializeCastable::from($entity);
 
-        self::assertTrue($serialize->isPossible(new SerializationContext('', $castable, [])));
+        self::assertTrue(
+            $serialize->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue($castable)
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testCantBeSerializedIfDoesntImplementCastable(): void
@@ -29,7 +40,14 @@ final class CastableSerializerTest extends TestCase
         $notCastable = $this->createMock(AggregateRoot::class);
         $serialize = SerializeCastable::from($entity);
 
-        self::assertFalse($serialize->isPossible(new SerializationContext('', $notCastable, [])));
+        self::assertFalse(
+            $serialize->isPossible(
+                SerializationContext::make()
+                    ->withFieldName('')
+                    ->withValue($notCastable)
+                    ->withAttributes([])
+            )
+        );
     }
 
     public function testUsesCasterToSerialize(): void
@@ -38,13 +56,18 @@ final class CastableSerializerTest extends TestCase
         $castableVO = new CastableValueObject();
         $caster = $this->createMock(CastsAttributes::class);
         $caster->method('set')
-               ->willReturnMap([[$entity, 'property', $castableVO, ['name' => 'value'], ['to_be' => 'returned']]]);
+            ->willReturnMap([[$entity, 'property', $castableVO, ['name' => 'value'], ['to_be' => 'returned']]]);
         $castableVO::setCaster($caster);
         $serialize = SerializeCastable::from($entity);
 
         self::assertSame(
             ['to_be' => 'returned'],
-            $serialize(new SerializationContext('property', $castableVO, ['property' => ['name' => 'value'], 'another' => 'ff023cc8'])),
+            $serialize(
+                SerializationContext::make()
+                    ->withFieldName('property')
+                    ->withValue($castableVO)
+                    ->withAttributes(['property' => ['name' => 'value'], 'another' => 'ff023cc8'])
+            ),
         );
     }
 
@@ -54,10 +77,16 @@ final class CastableSerializerTest extends TestCase
         $castableVO = new CastableValueObject();
         $caster = $this->createMock(CastsAttributes::class);
         $castableVO::setCaster($caster);
-        $caster->method('set')->willReturn(null);
+        $caster->method('set')
+            ->willReturn(null);
 
         $serialize = SerializeCastable::from($entity, ['first' => ['some', 'values']]);
-        $serialize(new SerializationContext('first', $castableVO, ['first' => ['name' => 'value']]));
+        $serialize(
+            SerializationContext::make()
+                ->withFieldName('first')
+                ->withValue($castableVO)
+                ->withAttributes(['first' => ['name' => 'value']])
+        );
 
         self::assertSame(['some', 'values'], $castableVO::releaseArguments());
     }
@@ -68,11 +97,17 @@ final class CastableSerializerTest extends TestCase
         $castableVO = new CastableValueObject();
         $caster = $this->createMock(CastsAttributes::class);
         $castableVO::setCaster($caster);
-        $caster->method('set')->willReturn(null);
+        $caster->method('set')
+            ->willReturn(null);
 
         $serialize = SerializeCastable::from($entity, [CastableValueObject::class => ['some', 'values']]);
-        $serialize(new SerializationContext('prop', $castableVO, ['prop' => ['name' => 'value']]));
+        $serialize(
+            SerializationContext::make()
+                ->withFieldName('prop')
+                ->withValue($castableVO)
+                ->withAttributes(['prop' => ['name' => 'value']])
+        );
 
-        self::assertSame(['some', 'values'],$castableVO::releaseArguments());
+        self::assertSame(['some', 'values'], $castableVO::releaseArguments());
     }
 }

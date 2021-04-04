@@ -18,8 +18,6 @@ use Rela589n\DoctrineEventSourcing\Event\Concern\TypesMeta\CollectEventSerialize
 use Rela589n\DoctrineEventSourcing\Event\Concern\TypesMeta\CollectEventSerializeMetaInMemoryCacheDecorator;
 use Rela589n\DoctrineEventSourcing\Serializer\Composed\ComposedDeserializer;
 use Rela589n\DoctrineEventSourcing\Serializer\Composed\ComposedSerializer;
-use Rela589n\DoctrineEventSourcing\Serializer\Composed\DeserializeProperty;
-use Rela589n\DoctrineEventSourcing\Serializer\Composed\SerializeProperty;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 
@@ -45,10 +43,16 @@ trait AggregateChanged
     private ?CollectEventSerializeMeta $collectPropertiesMeta = null;
 
     #[HideFromPayload]
-    private ?ComposedDeserializer $deserializerCached = null;
+    private ?ComposedSerializer\Factory\Context $serializerFactoryContext = null;
 
     #[HideFromPayload]
-    private ?ComposedSerializer $serializerCached = null;
+    private ?ComposedSerializer\Factory $serializerFactory = null;
+
+    #[HideFromPayload]
+    private ?ComposedDeserializer\Factory\Context $deserializerFactoryContext = null;
+
+    #[HideFromPayload]
+    private ?ComposedDeserializer\Factory $deserializerFactory = null;
 
     public function __construct(AggregateRoot $entity)
     {
@@ -81,14 +85,27 @@ trait AggregateChanged
         $reflectionClass = $this->reflectionClass($args->getEntityManager());
         $properties = $this->properties($reflectionClass);
 
-        $serialize = $this->serializer($args->getEntityManager(), $properties);
+        $serialize = $this->serializerFactory(
+            $this->serializerFactoryContext
+            ?? $this->serializerFactoryContext =
+                ComposedSerializer\Factory\Context::make()
+                    ->withEntityManager($args->getEntityManager())
+                    ->withEntity($this->entity)
+                    ->withPropertiesMeta($this->collectPropertiesMeta()(... $properties))
+                    ->withCastArgumentsMap($this->castArguments())
+        )
+            ->make();
 
         foreach ($properties as $property) {
             $name = $property->getName();
             $value = $property->getValue($this);
 
-            $context = new SerializationContext($name, $value, $this->payload);
-            ['name' => $saveUnderName, 'value' => $serialized] = $serialize($context);
+            ['name' => $saveUnderName, 'value' => $serialized] = $serialize(
+                SerializationContext::make()
+                    ->withFieldName($name)
+                    ->withValue($value)
+                    ->withAttributes($this->payload)
+            );
             $this->payload[$saveUnderName] = $serialized;
         }
     }
@@ -98,14 +115,29 @@ trait AggregateChanged
         $reflectionClass = $this->reflectionClass($args->getEntityManager());
         $properties = $this->properties($reflectionClass);
 
-        $deserialize = $this->deserializer($args->getEntityManager(), $properties);
+        $deserialize = $this->deserializerFactory(
+            $this->deserializerFactoryContext
+            ?? $this->deserializerFactoryContext = ComposedDeserializer\Factory\Context::make()
+                ->withEntityManager($args->getEntityManager())
+                ->withEntity($this->entity)
+                ->withPropertiesMeta($this->collectPropertiesMeta()(...$properties))
+                ->withCastArgumentsMap($this->castArguments())
+        )
+            ->make();
 
         foreach ($properties as $property) {
             $name = $property->getName();
             $typename = (string)$property->getType()?->getName();
 
-            $context = new DeserializationContext($name, $typename, $this->payload);
-            $property->setValue($this, $deserialize($context));
+            $property->setValue(
+                $this,
+                $deserialize(
+                    DeserializationContext::make()
+                        ->withFieldName($name)
+                        ->withType($typename)
+                        ->withSerialized($this->payload),
+                )
+            );
         }
     }
 
@@ -133,36 +165,26 @@ trait AggregateChanged
         return $manager->getClassMetadata(static::class)->reflClass;
     }
 
-    protected function serializer(EntityManagerInterface $manager, array $properties): ComposedSerializer
+    private function serializerFactory(ComposedSerializer\Factory\Context $context): ComposedSerializer\Factory
     {
-        return $this->serializerCached
-            ?? $this->serializerCached = $this->makeSerializer($manager, $properties);
+        return $this->serializerFactory
+            ?? $this->serializerFactory = $this->makeSerializerFactory($context);
     }
 
-    protected function makeSerializer(EntityManagerInterface $manager, array $properties): ComposedSerializer
+    protected function makeSerializerFactory(ComposedSerializer\Factory\Context $context): ComposedSerializer\Factory
     {
-        return new SerializeProperty(
-            $manager,
-            $this->entity,
-            $this->collectPropertiesMeta()(...$properties),
-            $this->castArguments(),
-        );
+        return ComposedSerializer\Factory\Impl::fromContext($context);
     }
 
-    protected function deserializer(EntityManagerInterface $manager, array $properties): ComposedDeserializer
+    private function deserializerFactory(ComposedDeserializer\Factory\Context $context): ComposedDeserializer\Factory
     {
-        return $this->deserializerCached ??
-            $this->deserializerCached = $this->makeDeserializer($manager, $properties);
+        return $this->deserializerFactory
+            ?? $this->deserializerFactory = $this->makeDeserializerFactory($context);
     }
 
-    protected function makeDeserializer(EntityManagerInterface $manager, array $properties): ComposedDeserializer
+    protected function makeDeserializerFactory(ComposedDeserializer\Factory\Context $context): ComposedDeserializer\Factory
     {
-        return new DeserializeProperty(
-            $manager,
-            $this->entity,
-            $this->collectPropertiesMeta()(...$properties),
-            $this->castArguments(),
-        );
+        return ComposedDeserializer\Factory\Impl::fromContext($context);
     }
 
     protected function castArguments(): array
