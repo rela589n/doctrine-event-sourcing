@@ -14,7 +14,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\DeserializeTyped;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 
 /**
  * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\DeserializeTyped
@@ -22,15 +22,15 @@ use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
  */
 final class TypedDeserializerTest extends TestCase
 {
-    private EntityManagerInterface|MockObject $manager;
-    private ConvertToPHPValueMock $convertToPHPValue;
+    private MockObject|EntityManagerInterface $manager;
+    private MockObject|ConvertToPHPValue $convertToPHPValue;
     private DeserializeTyped $deserializer;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->setupEntityManager();
-        $this->convertToPHPValue = new ConvertToPHPValueMock();
+        $this->convertToPHPValue = $this->createMock(ConvertToPHPValue::class);
     }
 
     public function testCanBeDeserializedIfHasRegisteredType(): void
@@ -45,7 +45,6 @@ final class TypedDeserializerTest extends TestCase
             $this->deserializer->isPossible(
                 DeserializationContext::make()
                     ->withFieldName('property')
-
                     ->withSerialized([])
             )
         );
@@ -63,7 +62,6 @@ final class TypedDeserializerTest extends TestCase
             $this->deserializer->isPossible(
                 DeserializationContext::make()
                     ->withFieldName('property')
-
                     ->withSerialized([])
             )
         );
@@ -74,11 +72,9 @@ final class TypedDeserializerTest extends TestCase
         $type = Type::getType(Types::DATETIMETZ_MUTABLE);
         $this->setUpDeserializer(['another' => $type]);
 
-        $this->convertToPHPValue->will(
-            self::returnValueMap(
-                [[$type, ['serialized'], 'serialization result']]
-            )
-        );
+        $this->convertToPHPValue
+            ->method('__invoke')
+            ->willReturnMap([[$type, ['serialized'], 'serialization result']]);
 
         self::assertSame(
             'serialization result',
@@ -91,7 +87,7 @@ final class TypedDeserializerTest extends TestCase
         );
     }
 
-    private function setupEntityManager()
+    private function setupEntityManager(): void
     {
         $this->manager = $this->createMock(EntityManagerInterface::class);
         $connection = $this->createMock(Connection::class);
