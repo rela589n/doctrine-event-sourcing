@@ -1,0 +1,17 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Tests\Integration\DomainMock\User\Events\UserEvent" table="user_events" inheritance-type="SINGLE_TABLE">
+        <many-to-one field="entity" target-entity="Tests\Integration\DomainMock\User\Doctrine\User" inversed-by="recordedEvents">
+            <join-column name="user_uuid" referenced-column-name="uuid"/>
+        </many-to-one>
+
+        <discriminator-column name="name" type="string"/>
+
+        <discriminator-map>
+            <discriminator-mapping value="user_changed_login" class="Tests\Integration\DomainMock\User\Events\UserChangedLogin"/>
+            <discriminator-mapping value="user_registered" class="Tests\Integration\DomainMock\User\Events\UserRegistered"/>
+        </discriminator-map>
+    </entity>
+</doctrine-mapping>

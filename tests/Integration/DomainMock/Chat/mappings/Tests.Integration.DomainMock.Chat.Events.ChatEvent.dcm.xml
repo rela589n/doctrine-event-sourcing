@@ -1,0 +1,17 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Tests\Integration\DomainMock\Chat\Events\ChatEvent" table="chat_events" inheritance-type="SINGLE_TABLE">
+        <many-to-one field="entity" target-entity="Tests\Integration\DomainMock\Chat\Doctrine\Chat" inversed-by="recordedEvents">
+            <join-column name="chat_uuid" referenced-column-name="uuid"/>
+        </many-to-one>
+
+        <discriminator-column name="name" type="string"/>
+
+        <discriminator-map>
+            <discriminator-mapping value="chat_created" class="Tests\Integration\DomainMock\Chat\Events\ChatCreated"/>
+            <discriminator-mapping value="user_joined_chat" class="Tests\Integration\DomainMock\Chat\Events\UserJoinedChat"/>
+        </discriminator-map>
+    </entity>
+</doctrine-mapping>

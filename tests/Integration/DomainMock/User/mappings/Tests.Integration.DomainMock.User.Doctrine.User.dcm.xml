@@ -1,0 +1,34 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Tests\Integration\DomainMock\User\Doctrine\User" table="users">
+        <id name="uuid" type="uuid" column="uuid">
+            <generator strategy="NONE"/>
+        </id>
+
+        <embedded name="login" class="Tests\Integration\DomainMock\User\VO\Login" use-column-prefix="false"/>
+        <embedded name="password" class="Tests\Integration\DomainMock\User\VO\Password" use-column-prefix="false"/>
+        <embedded name="name" class="Tests\Integration\DomainMock\User\VO\UserName" use-column-prefix="false"/>
+
+        <field name="createdAt" type="datetimetz" column="created_at"/>
+        <field name="updatedAt" type="datetimetz" column="updated_at"/>
+
+        <many-to-many field="chats" target-entity="Tests\Integration\DomainMock\Chat\Doctrine\Chat" inversed-by="users">
+            <join-table name="user_chat">
+                <join-columns>
+                    <join-column name="user_uuid" referenced-column-name="uuid"/>
+                </join-columns>
+                <inverse-join-columns>
+                    <join-column name="chat_uuid" referenced-column-name="uuid"/>
+                </inverse-join-columns>
+            </join-table>
+        </many-to-many>
+
+        <one-to-many field="recordedEvents" target-entity="Tests\Integration\DomainMock\User\Events\UserEvent" mapped-by="entity">
+            <cascade>
+                <cascade-persist/>
+            </cascade>
+        </one-to-many>
+    </entity>
+</doctrine-mapping>

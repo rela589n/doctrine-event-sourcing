@@ -1,0 +1,30 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Tests\Integration\DomainMock\Message\Doctrine\Message" table="messages">
+        <id name="uuid" type="uuid" column="uuid">
+            <generator strategy="NONE"/>
+        </id>
+
+        <embedded name="content" class="Tests\Integration\DomainMock\Message\VO\MessageContent" use-column-prefix="false"/>
+        <embedded name="status" class="Tests\Integration\DomainMock\Message\VO\MessageStatus" use-column-prefix="false"/>
+
+        <field name="createdAt" type="datetimetz" column="created_at"/>
+        <field name="updatedAt" type="datetimetz" column="updated_at"/>
+
+        <many-to-one field="user" target-entity="Tests\Integration\DomainMock\User\Doctrine\User" fetch="EAGER">
+            <join-column name="user_uuid" referenced-column-name="uuid"/>
+        </many-to-one>
+
+        <many-to-one field="chat" target-entity="Tests\Integration\DomainMock\Chat\Doctrine\Chat" inversed-by="messages">
+            <join-column name="chat_uuid" referenced-column-name="uuid"/>
+        </many-to-one>
+
+        <one-to-many field="recordedEvents" target-entity="Tests\Integration\DomainMock\Message\Events\MessageEvent" mapped-by="entity">
+            <cascade>
+                <cascade-persist/>
+            </cascade>
+        </one-to-many>
+    </entity>
+</doctrine-mapping>
