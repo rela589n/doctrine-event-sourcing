@@ -14,8 +14,8 @@ use ReflectionProperty;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\SerializeEmbedded;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded;
 use stdClass;
-use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
 /**
@@ -26,7 +26,7 @@ use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 final class EmbeddedSerializerTest extends TestCase
 {
     private MockObject|EntityManagerInterface $manager;
-    private TypeIsEmbeddedMock $typeIsEmbedded;
+    private MockObject|TypeIsEmbedded $typeIsEmbedded;
     private MockObject|ConvertToDatabaseValue $convertToDatabaseValue;
     private SerializeEmbedded $serializer;
 
@@ -40,9 +40,9 @@ final class EmbeddedSerializerTest extends TestCase
     public function testCanBeSerializedIfTypeIsEmbedded(): void
     {
         $this->setUpSerializer($this->createMock(ClassMetadataInfo::class));
-        $this->typeIsEmbedded->will(
-            self::returnValueMap([[stdClass::class, true]])
-        );
+        $this->typeIsEmbedded
+            ->method('__invoke')
+            ->willReturnMap([[stdClass::class, true]]);
 
         $context = SerializationContext::make()
             ->withFieldName('')
@@ -54,9 +54,9 @@ final class EmbeddedSerializerTest extends TestCase
     public function testCantBeSerializedIfTypeIsNotEmbedded(): void
     {
         $this->setUpSerializer($this->createMock(ClassMetadataInfo::class));
-        $this->typeIsEmbedded->will(
-            self::returnValueMap([[stdClass::class, false]])
-        );
+        $this->typeIsEmbedded
+            ->method('__invoke')
+            ->willReturnMap([[stdClass::class, false]]);
 
         $context = SerializationContext::make()
             ->withFieldName('')
@@ -157,7 +157,7 @@ final class EmbeddedSerializerTest extends TestCase
 
     private function setupMisc(): void
     {
-        $this->typeIsEmbedded = new TypeIsEmbeddedMock();
+        $this->typeIsEmbedded = $this->createMock(TypeIsEmbedded::class);
         $this->convertToDatabaseValue = $this->createMock(ConvertToDatabaseValue::class);
     }
 
