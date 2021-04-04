@@ -14,8 +14,8 @@ use ReflectionClass;
 use ReflectionProperty;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\DeserializeEmbedded;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 use stdClass;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
 use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
@@ -26,9 +26,9 @@ use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
  */
 final class EmbeddedDeserializerTest extends TestCase
 {
-    private EntityManagerInterface|MockObject $manager;
+    private MockObject|EntityManagerInterface $manager;
     private TypeIsEmbeddedMock $typeIsEmbedded;
-    private ConvertToPHPValueMock $convertToPHPValue;
+    private MockObject|ConvertToPHPValue $convertToPHPValue;
     private DeserializeEmbedded $deserializer;
 
     protected function setUp(): void
@@ -109,13 +109,12 @@ final class EmbeddedDeserializerTest extends TestCase
         $this->setupDeserializer($entityMeta);
 
         $this->convertToPHPValue
-            ->will(
-                self::returnValueMap(
-                    [
-                        ['string', 'first serialized', 'first value'],
-                        ['string', 'second serialized', 'second value'],
-                    ],
-                ),
+            ->method('__invoke')
+            ->willReturnMap(
+                [
+                    ['string', 'first serialized', 'first value'],
+                    ['string', 'second serialized', 'second value'],
+                ]
             );
 
         /** @var EmbeddedValueObject $original */
@@ -154,7 +153,7 @@ final class EmbeddedDeserializerTest extends TestCase
     private function setupMisc(): void
     {
         $this->typeIsEmbedded = new TypeIsEmbeddedMock();
-        $this->convertToPHPValue = new ConvertToPHPValueMock();
+        $this->convertToPHPValue = $this->createMock(ConvertToPHPValue::class);
     }
 
     private function setupDeserializer(ClassMetadataInfo $entityMetadata): void
