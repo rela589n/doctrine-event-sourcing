@@ -15,8 +15,8 @@ use ReflectionProperty;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\DeserializeEmbedded;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\TypeIsEmbedded;
 use stdClass;
-use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
 /**
@@ -27,7 +27,7 @@ use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 final class EmbeddedDeserializerTest extends TestCase
 {
     private MockObject|EntityManagerInterface $manager;
-    private TypeIsEmbeddedMock $typeIsEmbedded;
+    private MockObject|TypeIsEmbedded $typeIsEmbedded;
     private MockObject|ConvertToPHPValue $convertToPHPValue;
     private DeserializeEmbedded $deserializer;
 
@@ -40,7 +40,8 @@ final class EmbeddedDeserializerTest extends TestCase
 
     public function testCanBeDeserializedIfTypeIsEmbedded(): void
     {
-        $this->typeIsEmbedded->will(self::returnValueMap([[stdClass::class, true]]));
+        $this->typeIsEmbedded->method('__invoke')
+            ->willReturnMap([[stdClass::class, true]]);
 
         $this->setupDeserializer($this->createMock(ClassMetadataInfo::class));
         self::assertTrue(
@@ -55,7 +56,8 @@ final class EmbeddedDeserializerTest extends TestCase
 
     public function testCantBeDeserializedIfTypeIsNotEmbedded(): void
     {
-        $this->typeIsEmbedded->will(self::returnValueMap([[stdClass::class, false]]));
+        $this->typeIsEmbedded->method('__invoke')
+            ->willReturnMap([[stdClass::class, false]]);
 
         $this->setupDeserializer($this->createMock(ClassMetadataInfo::class));
         self::assertFalse(
@@ -152,7 +154,7 @@ final class EmbeddedDeserializerTest extends TestCase
 
     private function setupMisc(): void
     {
-        $this->typeIsEmbedded = new TypeIsEmbeddedMock();
+        $this->typeIsEmbedded = $this->createMock(TypeIsEmbedded::class);
         $this->convertToPHPValue = $this->createMock(ConvertToPHPValue::class);
     }
 
