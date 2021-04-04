@@ -13,8 +13,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Embedded\SerializeEmbedded;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 use stdClass;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
 use Tests\Unit\Serializer\Mocks\Types\TypeIsEmbeddedMock;
 use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
 
@@ -25,9 +25,9 @@ use Tests\Unit\Serializer\Separate\Embedded\Mocks\EmbeddedValueObject;
  */
 final class EmbeddedSerializerTest extends TestCase
 {
-    private EntityManagerInterface|MockObject $manager;
+    private MockObject|EntityManagerInterface $manager;
     private TypeIsEmbeddedMock $typeIsEmbedded;
-    private ConvertToDatabaseValueMock $convertToDatabaseValue;
+    private MockObject|ConvertToDatabaseValue $convertToDatabaseValue;
     private SerializeEmbedded $serializer;
 
     protected function setUp(): void
@@ -117,13 +117,12 @@ final class EmbeddedSerializerTest extends TestCase
         $valueObject = new EmbeddedValueObject('first value', 'second value');
 
         $this->convertToDatabaseValue
-            ->will(
-                self::returnValueMap(
-                    [
-                        ['string', $valueObject->getProperty1(), 'first serialized'],
-                        ['string', $valueObject->getProperty2(), 'second serialized'],
-                    ],
-                ),
+            ->method('__invoke')
+            ->willReturnMap(
+                [
+                    ['string', $valueObject->getProperty1(), 'first serialized'],
+                    ['string', $valueObject->getProperty2(), 'second serialized'],
+                ]
             );
 
         $serialized = $this->serializer->__invoke(
@@ -159,7 +158,7 @@ final class EmbeddedSerializerTest extends TestCase
     private function setupMisc(): void
     {
         $this->typeIsEmbedded = new TypeIsEmbeddedMock();
-        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
+        $this->convertToDatabaseValue = $this->createMock(ConvertToDatabaseValue::class);
     }
 
     private function setUpSerializer(ClassMetadataInfo $entityMeta): void
