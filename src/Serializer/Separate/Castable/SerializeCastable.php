@@ -40,6 +40,6 @@ final class SerializeCastable implements SeparateSerializer
         /** @var CastsAttributes $caster */
         $caster = $value::castUsing($this->castArguments[$fieldName] ?? $this->castArguments[$value::class] ?? []);
 
-        return $caster->set($this->entity, $fieldName, $value, $attributes[$name]);
+        return $caster->set($this->entity, $fieldName, $value, $attributes[$name] ?? []);
     }
 }

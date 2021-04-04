@@ -106,4 +106,24 @@ final class CastableSerializerTest extends TestCase
 
         self::assertSame(['some', 'values'], $castableVO::releaseArguments());
     }
+
+    public function testDoesntFailIfNoAttributesForNameFound(): void
+    {
+        $entity = $this->createMock(AggregateRoot::class);
+        $castableVO = new CastableValueObject();
+        $caster = $this->createMock(CastsAttributes::class);
+        $castableVO::setCaster($caster);
+        $caster->method('set')
+            ->willReturn(null);
+
+        $serialize = SerializeCastable::from($entity, [CastableValueObject::class => ['some', 'values']]);
+        $serialize(
+            SerializationContext::make()
+                ->withFieldName('prop')
+                ->withValue($castableVO)
+                ->withAttributes([])
+        );
+
+        self::assertSame(['some', 'values'], $castableVO::releaseArguments());
+    }
 }
