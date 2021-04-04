@@ -11,7 +11,7 @@ class DeserializationContext
 {
     protected string $fieldName;
     protected string $type;
-    protected mixed $serialized;
+    protected array $serialized;
     protected ?string $name = null;
 
     private function __construct()
@@ -37,7 +37,7 @@ class DeserializationContext
         return $static;
     }
 
-    public function withSerialized(mixed $serialized): static
+    public function withSerialized(array $serialized): static
     {
         $static = clone $this;
         $static->serialized = $serialized;
@@ -67,7 +67,7 @@ class DeserializationContext
         return $this->type;
     }
 
-    public function getSerialized(): mixed
+    public function getSerialized(): array
     {
         return $this->serialized;
     }

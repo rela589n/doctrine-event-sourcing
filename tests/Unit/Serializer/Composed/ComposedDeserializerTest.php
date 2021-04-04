@@ -50,7 +50,7 @@ final class ComposedDeserializerTest extends TestCase
     {
         $context = DeserializationContext::make()
             ->withFieldName('original')
-            ->withSerialized('serialized original');
+            ->withSerialized(['original' => 'serialized original']);
         $e = new LogicException('Should not match');
 
         $separateDeserializer1 = $this->createMock(SeparateDeserializer::class);
@@ -83,8 +83,7 @@ final class ComposedDeserializerTest extends TestCase
     {
         $pipe = $this->createMock(DeserializationContextPipe::class);
         $context = DeserializationContext::make()
-            ->withFieldName('')
-            ->withSerialized('');
+            ->withFieldName('fieldName');
         $pipe->method('__invoke')
             ->willReturnMap([[$context, $context]]);
         $deserializer = new ComposedDeserializer(fn() => [$pipe], fn() => []);
