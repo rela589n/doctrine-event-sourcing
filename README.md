@@ -285,7 +285,7 @@ $message = Message::write(
 );
 ```
 
-What event would it trigger? Well, `MessageWritten` event:
+What event would it trigger? Something like `MessageWritten` event:
 
 ```php
 class MessageWritten extends MessageEvent
@@ -315,7 +315,7 @@ class MessageWritten extends MessageEvent
 
 You may wonder how it would get saved into database?
 
-Well, table of messages will look something like this:
+In messages table everything looks pretty boring:
 
 | uuid             | status   | content      | user_uuid        | chat_uuid        | created_at          | updated_at          |
 |------------------|----------|--------------|------------------|------------------|---------------------|---------------------|
@@ -327,11 +327,11 @@ What regards table `messsage_events`, it is full of magic:
 |----|-----------------|-------------------|--------------------------------------------------------------------------------------------------|---------------------|
 | 14 | message_written | 3950eef0-ac89...  | {"chat": "b84a6b78-a173...", "user": "69ab80be-b05e...", "content": {"content": "Some message"}} | 2021-03-27 20:31:09 |
 
-Payload has fields `chat` and `user` populated with primary keys. At the time events are loaded back, these entities
-won't be loaded right away, but rather proxied by doctrine. If we really would like to deal with them, doctrine will
-gracefully load them to be used by us.
+Payload fields `chat` and `user` were populated with primary keys. At the time events are loaded back, these entities
+won't be loaded right away, but rather proxied by doctrine. If we really would like to deal with these related objects, 
+doctrine will gracefully load them from the database to be used.
 
-## API
+## Customization
 
 ### Customizing field names
 
