@@ -17,9 +17,9 @@ use Ramsey\Uuid\Uuid;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\DeserializeEntity;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToPHPValue;
 use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\ResolvePrimaryType;
 use Tests\Mocks\AggregateRootMock;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToPHPValueMock;
 
 /**
  * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity\DeserializeEntity
@@ -30,7 +30,7 @@ final class EntityDeserializerTest extends TestCase
     private MockObject|EntityManagerInterface $manager;
     private MockObject|AbstractProxyFactory $proxyFactory;
     private DeserializeEntity $deserializer;
-    private ConvertToPHPValueMock $convertToPHPValue;
+    private MockObject|ConvertToPHPValue $convertToPHPValue;
     private MockObject|ResolvePrimaryType $resolvePrimaryTypeMock;
     private MockObject|UnitOfWork $unitOfWork;
 
@@ -79,16 +79,15 @@ final class EntityDeserializerTest extends TestCase
         $resolvedPrimary = Uuid::fromString($user->getPrimary());
 
         $this->convertToPHPValue
-            ->will(
-                self::returnValueMap(
+            ->method('__invoke')
+            ->willReturnMap(
+                [
                     [
-                        [
-                            Type::getType(Types::GUID),
-                            $serialized['user'],
-                            $resolvedPrimary,
-                        ],
-                    ]
-                )
+                        Type::getType(Types::GUID),
+                        $serialized['user'],
+                        $resolvedPrimary,
+                    ],
+                ]
             );
 
         AggregateRootMock::setPrimaryName('uuid');
@@ -123,16 +122,15 @@ final class EntityDeserializerTest extends TestCase
 
         $resolvedPrimary = Uuid::fromString($primary);
         $this->convertToPHPValue
-            ->will(
-                self::returnValueMap(
+            ->method('__invoke')
+            ->willReturnMap(
+                [
                     [
-                        [
-                            Type::getType(Types::GUID),
-                            $serialized['user'],
-                            $resolvedPrimary,
-                        ],
-                    ]
-                )
+                        Type::getType(Types::GUID),
+                        $serialized['user'],
+                        $resolvedPrimary,
+                    ],
+                ]
             );
 
         $user = new AggregateRootMock($primary);
@@ -170,7 +168,7 @@ final class EntityDeserializerTest extends TestCase
 
     private function setUpDeserializer()
     {
-        $this->convertToPHPValue = new ConvertToPHPValueMock();
+        $this->convertToPHPValue = $this->createMock(ConvertToPHPValue::class);
         $this->proxyFactory = $this->createMock(AbstractProxyFactory::class);
         $this->resolvePrimaryTypeMock = $this->createMock(ResolvePrimaryType::class);
         $this->unitOfWork = $this->createMock(UnitOfWork::class);
