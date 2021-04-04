@@ -13,7 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\SerializationContext;
 use Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\SerializeTyped;
-use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
+use Rela589n\DoctrineEventSourcing\Serializer\Util\Converter\ConvertToDatabaseValue;
 
 /**
  * @covers \Rela589n\DoctrineEventSourcing\Serializer\Separate\Typed\SerializeTyped
@@ -21,15 +21,15 @@ use Tests\Unit\Serializer\Mocks\Converter\ConvertToDatabaseValueMock;
  */
 final class TypedSerializerTest extends TestCase
 {
-    private EntityManagerInterface|MockObject $manager;
-    private ConvertToDatabaseValueMock $convertToDatabaseValue;
+    private MockObject|EntityManagerInterface $manager;
+    private MockObject|ConvertToDatabaseValue $convertToDatabaseValue;
     private SerializeTyped $serializer;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->setupEntityManager();
-        $this->convertToDatabaseValue = new ConvertToDatabaseValueMock();
+        $this->convertToDatabaseValue = $this->createMock(ConvertToDatabaseValue::class);
     }
 
     public function testCanBeSerializedIfHasRegisteredType(): void
@@ -73,13 +73,9 @@ final class TypedSerializerTest extends TestCase
         $type = Type::getType(Types::BOOLEAN);
         $this->setUpSerializer(['another' => $type]);
 
-        $this->convertToDatabaseValue->will(
-            self::returnValueMap(
-                [
-                    [$type, true, 'true']
-                ]
-            )
-        );
+        $this->convertToDatabaseValue
+            ->method('__invoke')
+            ->willReturnMap([[$type, true, 'true']]);
 
         self::assertSame(
             'true',
