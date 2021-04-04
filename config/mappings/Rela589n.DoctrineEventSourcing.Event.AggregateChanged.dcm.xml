@@ -16,8 +16,8 @@
         </field>
 
         <lifecycle-callbacks>
-            <lifecycle-callback type="preFlush" method="onPreFlush"/>
-            <lifecycle-callback type="postLoad" method="onPostLoad"/>
+            <lifecycle-callback type="preFlush" method="onPreFlushAggregateChanged"/>
+            <lifecycle-callback type="postLoad" method="onPostLoadAggregateChanged"/>
         </lifecycle-callbacks>
     </mapped-superclass>
 </doctrine-mapping>

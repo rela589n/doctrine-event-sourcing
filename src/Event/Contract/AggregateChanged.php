@@ -14,7 +14,7 @@ interface AggregateChanged
 
     public function getTimestamp(): DateTime;
 
-    public function onPreFlush(PreFlushEventArgs $args): void;
+    public function onPreFlushAggregateChanged(PreFlushEventArgs $args): void;
 
-    public function onPostLoad(LifecycleEventArgs $args): void;
+    public function onPostLoadAggregateChanged(LifecycleEventArgs $args): void;
 }

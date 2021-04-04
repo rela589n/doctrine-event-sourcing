@@ -62,13 +62,13 @@ trait AggregateChanged
         $this->payload = [];
     }
 
-    protected function collectPropertiesMeta(): CollectEventSerializeMeta
+    private function collectPropertiesMeta(): CollectEventSerializeMeta
     {
         return $this->collectPropertiesMeta
             ?? $this->collectPropertiesMeta = $this->makeMetaCollector();
     }
 
-    protected function makeMetaCollector(): CollectEventSerializeMeta
+    private function makeMetaCollector(): CollectEventSerializeMeta
     {
         return new CollectEventSerializeMetaInMemoryCacheDecorator(
             new CollectEventSerializeMetaImpl(),
@@ -80,7 +80,8 @@ trait AggregateChanged
         return $this->timestamp;
     }
 
-    public function onPreFlush(PreFlushEventArgs $args): void
+    /** @internal */
+    final public function onPreFlushAggregateChanged(PreFlushEventArgs $args): void
     {
         $reflectionClass = $this->reflectionClass($args->getEntityManager());
         $properties = $this->properties($reflectionClass);
@@ -110,7 +111,8 @@ trait AggregateChanged
         }
     }
 
-    public function onPostLoad(LifecycleEventArgs $args): void
+    /** @internal */
+    final public function onPostLoadAggregateChanged(LifecycleEventArgs $args): void
     {
         $reflectionClass = $this->reflectionClass($args->getEntityManager());
         $properties = $this->properties($reflectionClass);
@@ -142,7 +144,7 @@ trait AggregateChanged
     }
 
     /** @return ReflectionProperty[] */
-    protected function properties(ReflectionClass $reflectionClass): array
+    private function properties(ReflectionClass $reflectionClass): array
     {
         $properties = array_filter(
             $reflectionClass->getProperties(),
@@ -154,13 +156,13 @@ trait AggregateChanged
         return $properties;
     }
 
-    protected function shouldNotSerialize(ReflectionProperty $property): bool
+    private function shouldNotSerialize(ReflectionProperty $property): bool
     {
         return $property->isStatic()
             || !empty($property->getAttributes(HideFromPayload::class));
     }
 
-    protected function reflectionClass(EntityManagerInterface $manager): ReflectionClass
+    private function reflectionClass(EntityManagerInterface $manager): ReflectionClass
     {
         return $manager->getClassMetadata(static::class)->reflClass;
     }
