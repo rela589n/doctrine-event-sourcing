@@ -10,6 +10,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\UnitOfWork;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -31,6 +32,7 @@ final class EntityDeserializerTest extends TestCase
     private DeserializeEntity $deserializer;
     private ConvertToPHPValueMock $convertToPHPValue;
     private ResolvePrimaryTypeMock $resolvePrimaryTypeMock;
+    private MockObject|UnitOfWork $unitOfWork;
 
     protected function setUp(): void
     {
@@ -63,6 +65,54 @@ final class EntityDeserializerTest extends TestCase
                     ->withSerialized([])
             )
         );
+    }
+
+    public function testDeserializesEntityWithoutProxyIfExistsInIdentityMap(): void
+    {
+        $user = new AggregateRootMock('123e4567-e89b-12d3-a456-423614174001');
+        $serialized = ['user' => $user->getPrimary()];
+
+        $this->resolvePrimaryTypeMock
+            ->will(
+                self::returnValueMap(
+                    [
+                        [AggregateRootMock::class, Type::getType(Types::GUID)]
+                    ]
+                )
+            );
+
+        $resolvedPrimary = Uuid::fromString($user->getPrimary());
+
+        $this->convertToPHPValue
+            ->will(
+                self::returnValueMap(
+                    [
+                        [
+                            Type::getType(Types::GUID),
+                            $serialized['user'],
+                            $resolvedPrimary,
+                        ],
+                    ]
+                )
+            );
+
+        AggregateRootMock::setPrimaryName('uuid');
+
+        $this->unitOfWork->method('tryGetById')
+            ->willReturnMap(
+                [
+                    [[AggregateRootMock::getPrimaryName() => $resolvedPrimary], AggregateRootMock::class, $user],
+                ]
+            );
+
+        $deserialized = ($this->deserializer)(
+            DeserializationContext::make()
+                ->withFieldName('user')
+                ->withType(AggregateRootMock::class)
+                ->withSerialized($serialized)
+        );
+
+        self::assertSame($user, $deserialized);
     }
 
     public function testDeserializeEntityUsingPrimary(): void
@@ -133,7 +183,9 @@ final class EntityDeserializerTest extends TestCase
         $this->convertToPHPValue = new ConvertToPHPValueMock();
         $this->proxyFactory = $this->createMock(AbstractProxyFactory::class);
         $this->resolvePrimaryTypeMock = new ResolvePrimaryTypeMock();
+        $this->unitOfWork = $this->createMock(UnitOfWork::class);
         $this->deserializer = new DeserializeEntity(
+            $this->unitOfWork,
             $this->proxyFactory,
             $this->convertToPHPValue,
             $this->resolvePrimaryTypeMock,

@@ -6,6 +6,7 @@ namespace Rela589n\DoctrineEventSourcing\Serializer\Separate\Entity;
 
 use Doctrine\Common\Proxy\AbstractProxyFactory as ProxyFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\UnitOfWork;
 use JetBrains\PhpStorm\Immutable;
 use Rela589n\DoctrineEventSourcing\Entity\AggregateRoot;
 use Rela589n\DoctrineEventSourcing\Serializer\Context\DeserializationContext;
@@ -17,15 +18,17 @@ use Rela589n\DoctrineEventSourcing\Serializer\Util\Types\ResolvePrimaryType;
 final class DeserializeEntity implements SeparateDeserializer
 {
     public function __construct(
-        protected ProxyFactory $proxyFactory,
-        protected ConvertToPHPValue $convertToPHPValue,
-        protected ResolvePrimaryType $resolvePrimaryType,
+        private UnitOfWork $unitOfWork,
+        private ProxyFactory $proxyFactory,
+        private ConvertToPHPValue $convertToPHPValue,
+        private ResolvePrimaryType $resolvePrimaryType,
     ) {
     }
 
     public static function from(EntityManagerInterface $manager): self
     {
         return new self(
+            $manager->getUnitOfWork(),
             $manager->getProxyFactory(),
             ConvertToPHPValue\Impl::fromEntityManager($manager),
             new ResolvePrimaryType\Impl($manager),
@@ -44,10 +47,11 @@ final class DeserializeEntity implements SeparateDeserializer
         $type = $context->getType();
         $serialized = $context->getSerialized();
 
-        return $this->proxyFactory->getProxy(
-            $type,
-            [$type::getPrimaryName() => $this->getPrimary($type, $serialized[$name])],
-        );
+        $primary = $this->getPrimary($type, $serialized[$name]);
+        $identifier = [$type::getPrimaryName() => $primary];
+
+        return $this->unitOfWork->tryGetById($identifier, $type)
+            ?: $this->proxyFactory->getProxy($type, $identifier);
     }
 
     protected function getPrimary(string $type, mixed $serialized)
