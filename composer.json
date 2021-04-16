@@ -30,6 +30,9 @@
             "Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "ci-test": "vendor/bin/phpunit --coverage-clover coverage.xml"
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }

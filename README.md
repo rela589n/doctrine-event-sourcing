@@ -1,5 +1,7 @@
 # Doctrine Event Sourcing
 
+[![codecov](https://codecov.io/gh/rela589n/doctrine-event-sourcing/branch/master/graph/badge.svg?token=KYYX649NPW)](https://codecov.io/gh/rela589n/doctrine-event-sourcing)
+
 This package is intended to simplify implementation of Event Sourcing pattern in applications using Doctrine ORM.
 
 ## Installation
