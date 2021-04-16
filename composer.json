@@ -1,7 +1,6 @@
 {
     "name": "rela589n/doctrine-event-sourcing",
     "description": "Package for simple event-sourcing implementation utilizing Doctrine ORM",
-    "version": "1.0.0",
     "type": "library",
     "require": {
         "php": "^8.0",
