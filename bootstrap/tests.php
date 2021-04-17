@@ -8,17 +8,17 @@ use Ramsey\Uuid\Doctrine\UuidType;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__.'/../docker');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__.'/..', '.env.testing');
 $env = $dotenv->load();
 
 $entityManager = EntityManager::create(
     [
-        'host' => 'test_db',
-        'port' => 5432,
+        'host' => $env['DB_HOST'],
+        'port' => $env['DB_PORT'],
         'user' => $env['DB_USERNAME'],
         'password' => $env['DB_PASSWORD'],
         'dbname' => $env['DB_DATABASE'],
-        'driver' => 'pdo_pgsql',
+        'driver' => $env['DB_DRIVER'],
     ],
     Setup::createXMLMetadataConfiguration(
         [
