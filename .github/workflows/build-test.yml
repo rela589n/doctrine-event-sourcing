@@ -1,0 +1,63 @@
+name: Run-Tests
+
+on:
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Login To Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Pull latest image (for build cache)
+        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/doctrine-event-sourcing-php:latest
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        id: build-php
+        uses: ./.github/actions/build
+        with:
+          uname: dev
+          uid: 1001
+          gid: 1001
+
+      - name: Push Docker Image
+        run: |
+          IMAGE_TAG='${{ steps.build-php.outputs.image-tag }}'
+          docker push $IMAGE_TAG
+          echo $IMAGE_TAG
+
+  phpunit:
+    runs-on: ubuntu-20.04
+    needs:
+      - build-and-push
+    container: 'rela589n/doctrine-event-sourcing-php:${{ github.sha }}'
+    services:
+      test_db:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_DB: des
+          POSTGRES_USER: des_user
+          POSTGRES_PASSWORD: p@$$w0rd
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Run Tests
+        uses: ./.github/actions/test
