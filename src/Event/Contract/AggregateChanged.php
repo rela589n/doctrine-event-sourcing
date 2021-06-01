@@ -10,7 +10,7 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 
 interface AggregateChanged
 {
-    public function NAME(): string;
+    public static function NAME(): string;
 
     public function getTimestamp(): DateTime;
 

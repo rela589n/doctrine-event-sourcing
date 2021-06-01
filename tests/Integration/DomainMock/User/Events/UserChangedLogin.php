@@ -36,7 +36,7 @@ class UserChangedLogin extends UserEvent
         return $this->newLogin;
     }
 
-    public function NAME(): string
+    public static function NAME(): string
     {
         return 'user_changed_login';
     }

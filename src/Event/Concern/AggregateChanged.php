@@ -58,7 +58,7 @@ trait AggregateChanged
     {
         $this->entity = $entity;
         $this->timestamp = new DateTimeImmutable();
-        $this->name = $this->NAME();
+        $this->name = static::NAME();
         $this->payload = [];
     }
 
@@ -117,15 +117,15 @@ trait AggregateChanged
         $reflectionClass = $this->reflectionClass($args->getEntityManager());
         $properties = $this->properties($reflectionClass);
 
-        $deserialize = $this->deserializerFactory(
-            $this->deserializerFactoryContext
-            ?? $this->deserializerFactoryContext = ComposedDeserializer\Factory\Context::make()
-                ->withEntityManager($args->getEntityManager())
-                ->withEntity($this->entity)
-                ->withPropertiesMeta($this->collectPropertiesMeta()(...$properties))
-                ->withCastArgumentsMap($this->castArguments())
-        )
-            ->make();
+        $deserialize = $this
+            ->deserializerFactory(
+                $this->deserializerFactoryContext
+                ?? $this->deserializerFactoryContext = ComposedDeserializer\Factory\Context::make()
+                    ->withEntityManager($args->getEntityManager())
+                    ->withEntity($this->entity)
+                    ->withPropertiesMeta($this->collectPropertiesMeta()(...$properties))
+                    ->withCastArgumentsMap($this->castArguments())
+            )->make();
 
         foreach ($properties as $property) {
             $name = $property->getName();
