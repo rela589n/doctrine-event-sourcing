@@ -1,0 +1,35 @@
+name: 'Build PHP Image'
+description: 'Build PHP Image'
+
+inputs:
+  uname:
+    description: user name in container
+    required: true
+  uid:
+    required: true
+    description: user id in container
+  gid:
+    required: true
+    description: user's group in container
+outputs:
+  image-tag:
+    value: ${{ steps.build-image.outputs.image-tag }}
+    description: docker image tag
+runs:
+  using: "composite"
+  steps:
+    - name: Build Docker Image
+      id: build-image
+      shell: bash
+      run: |
+        IMAGE_TAG='rela589n/doctrine-event-sourcing-php:${{ github.sha }}'
+
+        docker build \
+        --build-arg uname=${{ inputs.uname }} \
+        --build-arg uid=${{ inputs.uid }} \
+        --build-arg gid=${{ inputs.gid }} \
+        --tag $IMAGE_TAG \
+        --cache-from rela589n/doctrine-event-sourcing-php:latest \
+        docker/services/app/
+
+        echo "::set-output name=image-tag::$(echo $IMAGE_TAG)"

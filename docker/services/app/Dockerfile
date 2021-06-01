@@ -9,6 +9,7 @@ ARG uid
 RUN apt-get update \
     && apt-get install -y \
         curl \
+        git \
         dpkg-dev \
         libonig-dev \
         libxml2-dev \

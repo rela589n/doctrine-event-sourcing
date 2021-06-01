@@ -1,0 +1,30 @@
+name: PHPUnit
+description: Run PHPUnit tests
+inputs:
+  coverage:
+    description: should the coverage report be generated
+    required: false
+    default: 'false'
+runs:
+  using: "composite"
+  steps:
+    - name: Validate composer.json and composer.lock
+      shell: bash
+      run: composer validate --strict
+
+    - name: Prepare Test environment
+      shell: bash
+      run: cp .env.testing.ci .env.testing
+
+    - name: Install dependencies
+      shell: bash
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Run tests
+      shell: bash
+      run: |
+        if [[ '${{ inputs.coverage }}' == 'true' ]]; then
+          XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml --coverage-clover=coverage.xml
+        else
+          vendor/bin/phpunit -c phpunit.xml
+        fi
